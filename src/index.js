@@ -12,9 +12,10 @@ import Auth from './components/auth/Auth';
 render(
  <BrowserRouter>
   <Routes>
-   <Route path='/Zmeet' element={<App />} />
-   <Route path=':meetUrl' element={<Meetpage />} />
+   <Route path='/' element={<App />}></Route>
+   <Route path='/:meetUrl' element={<Meetpage />} />
    <Route path='/account' element={<Auth />} />
+
    {/* <Route path="teams" element={<Teams />}>
           <Route path=":teamId" element={<Team />} />
           <Route path="new" element={<NewTeamForm />} />
