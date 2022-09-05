@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ZMeet-frontend/static/css/main.1b1bd56e.css",
+    "main.js": "/ZMeet-frontend/static/js/main.44f16bad.js",
+    "index.html": "/ZMeet-frontend/index.html",
+    "main.1b1bd56e.css.map": "/ZMeet-frontend/static/css/main.1b1bd56e.css.map",
+    "main.44f16bad.js.map": "/ZMeet-frontend/static/js/main.44f16bad.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1b1bd56e.css",
+    "static/js/main.44f16bad.js"
+  ]
+}
