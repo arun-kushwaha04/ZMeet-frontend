@@ -1,0 +1,23 @@
+.sec-col {
+    position: relative;
+    background-color: rgb(131, 130, 130);
+}
+
+.sec-col h4 {
+    position: absolute;
+    text-align: center;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    display: none;
+    transform: translate(-50%, -150%);
+}
+
+.sec-col:hover h4 {
+    display: block;
+}
+
+.video {
+    width: 100%;
+    height: auto;
+}
