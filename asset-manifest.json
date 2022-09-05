@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/ZMeet/static/css/main.1b1bd56e.css",
-    "main.js": "/ZMeet/static/js/main.856686eb.js",
+    "main.js": "/ZMeet/static/js/main.161c937d.js",
     "index.html": "/ZMeet/index.html",
     "main.1b1bd56e.css.map": "/ZMeet/static/css/main.1b1bd56e.css.map",
-    "main.856686eb.js.map": "/ZMeet/static/js/main.856686eb.js.map"
+    "main.161c937d.js.map": "/ZMeet/static/js/main.161c937d.js.map"
   },
   "entrypoints": [
     "static/css/main.1b1bd56e.css",
-    "static/js/main.856686eb.js"
+    "static/js/main.161c937d.js"
   ]
 }
