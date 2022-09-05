@@ -218,7 +218,7 @@ function App() {
         <Message.Item>
          Peer to peer communication, no server involved
         </Message.Item>
-        <Message.Item>In call chat communication</Message.Item>
+        {/* <Message.Item>In call chat communication</Message.Item> */}
        </Message.List>
       </Message>
      </Grid.Column>
