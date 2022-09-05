@@ -3,7 +3,7 @@
 // const HOSTNAME = '127.0.0.1';
 
 const BACKEND_URL = `https://zmeet-dawn.herokuapp.com`;
-const PORT = 51077;
+const PORT = 41252;
 const HOSTNAME = 'zmeet-dawn.herokuapp.com';
 
 export { BACKEND_URL, HOSTNAME, PORT };

@@ -5,9 +5,16 @@ import { HOSTNAME, PORT } from '../../urls';
 const initializePeerConnection = () => {
  return new Peer(undefined, {
   host: HOSTNAME,
-  port: PORT,
+  port: 443,
   path: '/webRTC/myapp',
+  secure: true,
  });
+ //  return new Peer(undefined, {
+ //   host: HOSTNAME,
+ //   port: PORT,
+ //  path: '/webRTC/myapp',
+ //  });
+ //  return new Peer();
 };
 const peers = {};
 let roomID;
@@ -23,7 +30,7 @@ const initializePeersEvents = (
  audioStatus,
  updateParticipant,
 ) => {
- console.log('Trying to get peer id', meetUrl);
+ console.log('Trying to get peer id', meetUrl, myPeer);
  myPeer.on('open', async (id) => {
   setUserId(id);
   userID = id;
