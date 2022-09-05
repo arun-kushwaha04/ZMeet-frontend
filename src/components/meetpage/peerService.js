@@ -1,11 +1,11 @@
 import { Peer } from 'peerjs';
 import socket from '../../socket.config';
-import { HOSTNAME } from '../../urls';
+import { HOSTNAME, PORT } from '../../urls';
 
 const initializePeerConnection = () => {
  return new Peer(undefined, {
   host: HOSTNAME,
-  port: 8000,
+  port: PORT,
   path: '/webRTC/myapp',
  });
 };
