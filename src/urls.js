@@ -4,6 +4,6 @@
 
 const BACKEND_URL = `https://zmeet.onrender.com`;
 const PORT = 10000;
-const HOSTNAME = 'zmeet-dawn.herokuapp.com';
+const HOSTNAME = 'zmeet.onrender.com';
 
 export { BACKEND_URL, HOSTNAME, PORT };
