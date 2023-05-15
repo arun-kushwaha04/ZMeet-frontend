@@ -24,11 +24,6 @@ export default function Header() {
     <Menu.Item name='ZMeet' />
    </Link>
    <Menu.Menu position='right'>
-    {/* <Linkdiv>
-     <Link to='/'>
-      <p>Create/Join Room</p>
-     </Link>
-    </Linkdiv> */}
     <Linkdiv>
      <Link to='/'>
       <p style={{ color: 'white' }}>

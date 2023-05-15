@@ -10,9 +10,8 @@ import {
  Input,
  Divider,
  Label,
- Modal,
 } from 'semantic-ui-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Layout from './Layout';
 import { BACKEND_URL } from './urls';
@@ -55,7 +54,6 @@ const verifyToken = async (token, navigate) => {
 function App() {
  const navigate = useNavigate();
  const [meetUrl, setMeetUrl] = useState('');
- const [open, setStatus] = useState(false);
  React.useEffect(() => {
   const token = localStorage.getItem('userToken');
   const username = localStorage.getItem('username');
@@ -82,9 +80,8 @@ function App() {
 
   const data = await res.json();
   if (data.status === 200) {
-   console.log(data);
    setMeetUrl(data.payload);
-   setStatus(true);
+   navigate(`/:${data.payload}`);
    return;
   }
   alert('Failed to generate meet url');
@@ -130,64 +127,16 @@ function App() {
       <Grid.Row>
        <Grid columns={3}>
         <Grid.Column>
-         <Modal
-          size='small'
-          open={open}
-          onOpen={() => setStatus(true)}
-          trigger={
-           <Button
-            icon
-            fluid
-            labelPosition='left'
-            color='blue'
-            onClick={getMeetUrl}
-           >
-            <Icon name='video' />
-            Create A Room
-           </Button>
-          }
+         <Button
+          icon
+          fluid
+          labelPosition='left'
+          color='blue'
+          onClick={getMeetUrl}
          >
-          <Modal.Header>Room Created</Modal.Header>
-          <Modal.Content>
-           <p>Your room was created successfully</p>
-          </Modal.Content>
-          <Modal.Actions>
-           <Button
-            onClick={() => {
-             setStatus(false);
-             window.open(
-              `mailto:SomeMail@blabla.example?subject=Join my room at Zmeet&body=Hi, Follow this link to join my room at Zmeet, ${meetUrl}`,
-             );
-             navigate(`/:${meetUrl}`);
-            }}
-           >
-            <Icon name='mail' />
-           </Button>
-           <Button
-            onClick={() => {
-             setStatus(false);
-             navigator.clipboard.writeText(meetUrl);
-            }}
-           >
-            <Icon name='copy' />
-           </Button>
-           <Button
-            positive
-            onClick={() => {
-             setStatus(false);
-             window.open(
-              `https://api.whatsapp.com/send?phone=1111111111&text=Hi, Follow this link to join my room at Zmeet, ${meetUrl}`,
-             );
-             navigate(`/:${meetUrl}`);
-            }}
-           >
-            <Icon name='whatsapp' />
-           </Button>
-           <Button negative onClick={() => navigate(`/:${meetUrl}`)}>
-            Join
-           </Button>
-          </Modal.Actions>
-         </Modal>
+          <Icon name='video' />
+          Create A Room
+         </Button>
         </Grid.Column>
         <Grid.Column width={1} verticalAlign='middle'>
          OR

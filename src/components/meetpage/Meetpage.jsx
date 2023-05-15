@@ -30,7 +30,7 @@ export default function Meetpage() {
  const [loading, setLoading] = useState(true);
 
  const [videoStatus, setVideoStatus] = useState(true);
- const [audioStatus, setAudioStatus] = useState(true);
+ const [audioStatus, setAudioStatus] = useState(false);
  let param = useParams();
  const meetUrl = param.meetUrl.slice(1);
 
@@ -61,6 +61,7 @@ export default function Meetpage() {
  }, [meetUrl]);
 
  const [participant, updateParticipant] = useState({});
+ const [visible, setVisible] = useState(false);
  return (
   <Layout>
    <Container>
@@ -79,15 +80,28 @@ export default function Meetpage() {
       Room Url Not Valid
      </Header>
     ) : (
-     <>
+     <div
+      style={{
+       display: 'flex',
+       position: 'relative',
+       width: '100%',
+       maxHeight: '100%',
+       overflow: 'hidden',
+      }}
+     >
       <Participantsdiv
        participant={participant}
        videoStatus={videoStatus}
        audioStatus={audioStatus}
+       visible={visible}
+       setVisible={setVisible}
       />
-      <Grid padded columns={1}>
-       <Grid.Column>
-        <Sidebar.Pushable as={Segment}>
+      <Grid padded columns={1} style={{ height: '100%', width: '100%' }}>
+       <Grid.Column style={{ height: '100%', width: '100%' }}>
+        <Sidebar.Pushable
+         as={Segment}
+         style={{ height: '100%', width: '100%' }}
+        >
          <Chats visible={isChatsVisible} setVisiblity={setChatVisiblity} />
          <Videodiv
           visible={isChatsVisible}
@@ -98,11 +112,13 @@ export default function Meetpage() {
           audioStatus={audioStatus}
           setVideoStatus={setVideoStatus}
           setAudioStatus={setAudioStatus}
+          btnvisible={visible}
+          setVisible={setVisible}
          />
         </Sidebar.Pushable>
        </Grid.Column>
       </Grid>
-     </>
+     </div>
     )}
    </Container>
   </Layout>

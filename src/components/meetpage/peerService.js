@@ -1,36 +1,33 @@
 import { Peer } from 'peerjs';
+import rug from 'random-username-generator';
 import socket from '../../socket.config';
-import { HOSTNAME, PORT } from '../../urls';
+import { HOSTNAME, PORT, SECURE } from '../../urls';
 
 const initializePeerConnection = () => {
  return new Peer(undefined, {
   host: HOSTNAME,
-  port: 443,
+  port: PORT,
   path: '/webRTC/myapp',
-  secure: true,
+  secure: SECURE,
  });
- //  return new Peer(undefined, {
- //   host: HOSTNAME,
- //   port: PORT,
- //  path: '/webRTC/myapp',
- //  });
- //  return new Peer();
 };
 const peers = {};
 let roomID;
 let userID;
-
-let globalStream;
+let userName = localStorage.getItem('username');
+if (!userName) {
+ userName = rug.generate();
+ localStorage.setItem('username', userName);
+}
 
 const initializePeersEvents = (
  myPeer,
  meetUrl,
  setUserId,
- videoStatus,
- audioStatus,
  updateParticipant,
+ setGlobalStream,
 ) => {
- console.log('Trying to get peer id', meetUrl, myPeer);
+ console.log('Intializing Peer');
  myPeer.on('open', async (id) => {
   setUserId(id);
   userID = id;
@@ -38,12 +35,11 @@ const initializePeersEvents = (
   const userData = {
    userID: id,
    roomID,
-   username: localStorage.getItem('username'),
+   username: userName,
   };
   console.log('peers established and joined room', userData);
   socket.emit('join-room', userData);
-  globalStream = await getVideoAndAudioStream(videoStatus, audioStatus);
-  setNavigatorToStream(myPeer, id, peers, updateParticipant);
+  setNavigatorToStream(myPeer, id, peers, updateParticipant, setGlobalStream);
  });
  myPeer.on('error', (err) => {
   console.log('peer connection error', err);
@@ -98,8 +94,18 @@ const removeParticipant = (updateParticipant, targetUserID) => {
  });
 };
 
-const setPeersListeners = (myPeer, peers, updateParticipant) => {
+const setPeersListeners = (
+ myPeer,
+ peers,
+ updateParticipant,
+ setGlobalStream,
+) => {
  myPeer.on('call', (call) => {
+  let globalStream;
+  setGlobalStream((t) => {
+   globalStream = t;
+   return t;
+  });
   call.answer(globalStream);
   const id = call.metadata.id;
   const username = call.metadata.username;
@@ -122,7 +128,7 @@ const setPeersListeners = (myPeer, peers, updateParticipant) => {
   call.on('close', () => {
    console.log('closing peers listeners', call.metadata.id);
    const div = document.getElementById(id);
-   div.remove();
+   if (div) div.remove();
    delete peers[id];
    removeParticipant(updateParticipant, id);
   });
@@ -137,29 +143,45 @@ const setPeersListeners = (myPeer, peers, updateParticipant) => {
  });
 };
 
-const newUserConnection = (peer, myuserID, peers, updateParticipant) => {
+const newUserConnection = (
+ peer,
+ myuserID,
+ peers,
+ updateParticipant,
+ setGlobalStream,
+) => {
+ console.log('new User');
  socket.on('user-connected', async (userID, othersUsername) => {
+  let globalStream;
+  setGlobalStream((t) => {
+   globalStream = t;
+   return t;
+  });
   console.log('New User Connected', userID, othersUsername);
   const userData = {
    userID,
    username: othersUsername,
    videoStatus: true,
-   audioStatus: true,
+   audioStatus: false,
   };
   updateParticipant((data) => {
    return { ...data, [userID]: userData };
   });
-  setTimeout(
-   connectToNewUser,
-   2000,
+  console.log(
+   'Stream on joining of user',
+   globalStream,
+   globalStream.getAudioTracks(),
+   globalStream.getVideoTracks(),
+  );
+  connectToNewUser(
    peer,
    userID,
    myuserID,
    peers,
    othersUsername,
    updateParticipant,
+   globalStream,
   );
-  // connectToNewUser(peer, userID, myuserID, updatePeers);
  });
 };
 
@@ -170,11 +192,14 @@ const connectToNewUser = async (
  peers,
  othersUsername,
  updateParticipant,
+ globalStream,
 ) => {
- console.log('stream ka check kaar raha hu', globalStream);
+ console.log(othersuserID, globalStream);
+ console.log('Intializing call');
  const call = myPeer.call(othersuserID, globalStream, {
   metadata: { id: myuserID, username: localStorage.getItem('username') },
  });
+ if (!call) return;
  call.on('stream', (userVideoStream) => {
   const div = document.getElementById(othersuserID);
   if (!div) {
@@ -248,67 +273,93 @@ export const createEmptyVideoTrack = ({ width, height }) => {
  return Object.assign(track, { enabled: false });
 };
 
-const getVideoAndAudioStream = (videoStatus, audioStatus) => {
+const getVideoAndAudioStream = (videoStatus, audioStatus, setGlobalStream) => {
  console.log('Mai video audio stream bana raha hu');
  return new Promise((resolve, reject) => {
-  navigator.mediaDevices
-   .getUserMedia({
-    video: true,
-    audio: true,
-   })
-   .then((stream) => {
-    globalStream = stream;
-    console.log(globalStream);
-    resolve(stream);
-   });
-  // if (!videoStatus && !audioStatus) {
-  //  const audioTrack = createEmptyAudioTrack();
-  //  const videoTrack = createEmptyVideoTrack({ width: 640, height: 480 });
-  //  const mediaStream = new MediaStream([audioTrack, videoTrack]);
-  //  globalStream = mediaStream;
-  //  resolve(mediaStream);
-  // } else {
-  //  navigator.mediaDevices
-  //   .getUserMedia({
-  //    video: videoStatus,
-  //    audio: audioStatus,
-  //   })
-  //   .then((stream) => {
-  //    globalStream = stream;
-  //    resolve(stream);
-  //   })
-  //   .catch((err) => {
-  //    const audioTrack = createEmptyAudioTrack();
-  //    const videoTrack = createEmptyVideoTrack({ width: 640, height: 480 });
-  //    const mediaStream = new MediaStream([audioTrack, videoTrack]);
-  //    globalStream = mediaStream;
-  //    resolve(mediaStream);
-  //   });
-  // }
+  if (!videoStatus && !audioStatus) {
+   const audioTrack = createEmptyAudioTrack();
+   const videoTrack = createEmptyVideoTrack({ width: 640, height: 480 });
+   const mediaStream = new MediaStream([audioTrack, videoTrack]);
+   resolve(mediaStream);
+  } else {
+   if (!videoStatus) {
+    navigator.mediaDevices
+     .getUserMedia({
+      video: videoStatus,
+      audio: audioStatus,
+     })
+     .then((stream) => {
+      const videoTrack = createEmptyVideoTrack({ width: 640, height: 480 });
+      const mediaStream = new MediaStream([
+       stream.getAudioTracks()[0],
+       videoTrack,
+      ]);
+      resolve(mediaStream);
+     });
+   } else if (!audioStatus) {
+    navigator.mediaDevices
+     .getUserMedia({
+      video: videoStatus,
+      audio: audioStatus,
+     })
+     .then((stream) => {
+      const audioTrack = createEmptyAudioTrack();
+      const mediaStream = new MediaStream([
+       audioTrack,
+       stream.getVideoTracks()[0],
+      ]);
+      resolve(mediaStream);
+     });
+   }
+   navigator.mediaDevices
+    .getUserMedia({
+     video: videoStatus,
+     audio: audioStatus,
+    })
+    .then((stream) => {
+     resolve(stream);
+    })
+    .catch((err) => {
+     const audioTrack = createEmptyAudioTrack();
+     const videoTrack = createEmptyVideoTrack({ width: 640, height: 480 });
+     const mediaStream = new MediaStream([audioTrack, videoTrack]);
+     resolve(mediaStream);
+    });
+  }
  });
 };
 
-const setNavigatorToStream = async (myPeer, id, peers, updateParticipant) => {
- setPeersListeners(myPeer, peers, updateParticipant);
- newUserConnection(myPeer, id, peers, updateParticipant);
+const setNavigatorToStream = async (
+ myPeer,
+ id,
+ peers,
+ updateParticipant,
+ setGlobalStream,
+) => {
+ setPeersListeners(myPeer, peers, updateParticipant, setGlobalStream);
+ newUserConnection(myPeer, id, peers, updateParticipant, setGlobalStream);
 };
 
-const reInitializeStream = async (videoStatus, audioStatus) => {
- if (globalStream) {
-  globalStream.getAudioTracks() &&
-   globalStream
-    .getAudioTracks()
-    .forEach((track) => (track.enabled = audioStatus));
-  globalStream.getVideoTracks() &&
-   globalStream
-    .getVideoTracks()
-    .forEach((track) => (track.enabled = videoStatus));
- }
+const reInitializeStream = async (videoStatus, audioStatus, setGlobaStream) => {
+ const globalStream = await getVideoAndAudioStream(
+  videoStatus,
+  audioStatus,
+  setGlobaStream,
+ );
+ console.log('active peers', peers);
+ console.log(globalStream.getAudioTracks(), globalStream.getVideoTracks());
+
+ Object.keys(peers).forEach((peerId) => {
+  const tracks = peers[peerId].peerConnection.getSenders();
+  tracks[0].replaceTrack(globalStream.getAudioTracks()[0]);
+  tracks[1].replaceTrack(globalStream.getVideoTracks()[0]);
+ });
+
+ setGlobaStream(globalStream);
 };
 
 const changeVideoStatus = (setStatus, videoStatus) => {
  setStatus((data) => {
-  // socket.to(roomID).emit('video-changed', userID, !data);
   return !data;
  });
  socket.emit('video-changed-client', userID, !videoStatus);

@@ -1,23 +1,38 @@
 .sec-col {
-    position: relative;
-    background-color: rgb(131, 130, 130);
+ position: relative;
+ background-color: #838282;
 }
 
 .sec-col h4 {
-    position: absolute;
-    text-align: center;
-    width: 100%;
-    top: 50%;
-    left: 50%;
-    display: none;
-    transform: translate(-50%, -150%);
+ position: absolute;
+ text-align: center;
+ width: 100%;
+ top: 50%;
+ left: 50%;
+ display: none;
+ transform: translate(-50%, -150%);
+ color: white;
+}
+
+.sec-col:hover {
+ background-color: #000;
 }
 
 .sec-col:hover h4 {
-    display: block;
+ display: block;
+}
+
+.sec-col:hover video {
+ opacity: 0.5;
 }
 
 .video {
-    width: 100%;
-    height: auto;
+ width: 100%;
+ height: 19rem;
+ object-fit: contain;
+}
+
+.randomvideogrid {
+ overflow-y: auto;
+ height: 90% !important;
 }

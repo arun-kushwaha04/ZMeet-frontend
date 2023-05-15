@@ -6,10 +6,12 @@ import styled from 'styled-components';
 const Contentcontainer = styled.section`
  flex-grow: 1;
  width: 100%;
+ height: 90%;
 `;
 const Navigationcontainer = styled.nav`
  height: auto;
  width: 100%;
+ height: 10%;
  .ui.menu {
   background-color: #ffcdff;
  }
@@ -21,6 +23,7 @@ export default function Layout({ children }) {
    style={{
     height: '100vh',
     display: 'flex',
+    width: '100vw',
     flexDirection: 'column',
    }}
   >

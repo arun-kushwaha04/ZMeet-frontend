@@ -157,7 +157,6 @@ const Authdiv = styled.div`
   background-color: transparent;
  }
  .vl {
-  border-left: 2px solid white;
   height: 100%;
  }
 `;

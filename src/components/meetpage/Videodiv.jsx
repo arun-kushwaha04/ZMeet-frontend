@@ -13,55 +13,69 @@ import {
 
 import './video.css';
 
+const width = window.innerWidth;
+const size = width <= 769 ? '' : 'large';
 export default function Videodiv({
- visible,
- setVisiblity,
  meetUrl,
  updateParticipant,
  videoStatus,
  audioStatus,
  setVideoStatus,
  setAudioStatus,
+ btnvisible,
+ setVisible,
 }) {
  const usersVideo = useRef();
  let peer = initializePeerConnection();
  const [userid, setUserId] = useState('');
  const [open, setOpen] = useState(false);
+ const [globalStream, setGlobalStream] = useState(null);
+ const [peerInitalized, setPeerInitalized] = useState(false);
+
+ // const getCurrentStream = () => globalStream;
 
  useEffect(() => {
-  if (!videoStatus && !audioStatus) {
-   usersVideo.current.srcObject = null;
-  } else {
-   navigator.mediaDevices
-    .getUserMedia({ video: videoStatus, audio: audioStatus })
-    .then((stream) => {
-     usersVideo.current.srcObject = stream;
-    });
-  }
-  if (userid) reInitializeStream(videoStatus, audioStatus);
- }, [audioStatus, userid, videoStatus]);
+  reInitializeStream(videoStatus, audioStatus, setGlobalStream);
+ }, [audioStatus, videoStatus]);
 
  useEffect(() => {
-  if (userid.length === 0) {
+  console.log(
+   'Current Stream',
+   globalStream,
+   globalStream?.getAudioTracks(),
+   globalStream?.getVideoTracks(),
+  );
+  usersVideo.current.srcObject = globalStream;
+ }, [globalStream]);
+
+ useEffect(() => {
+  if (!peer) return;
+  if (globalStream && !peerInitalized) {
+   console.log(
+    'Intial Stream',
+    globalStream,
+    globalStream.getAudioTracks(),
+    globalStream.getVideoTracks(),
+   );
    initializePeersEvents(
     peer,
     meetUrl,
     setUserId,
-    videoStatus,
-    audioStatus,
     updateParticipant,
+    setGlobalStream,
    );
    initializeSocketEvents(updateParticipant);
+   setPeerInitalized(true);
   }
- }, [userid, peer, videoStatus, audioStatus, meetUrl, updateParticipant]);
+ }, [userid, peer, meetUrl, updateParticipant, globalStream, peerInitalized]);
 
  return (
   <Maindiv>
-   <Segmentdiv>
-    <Segment basic>
+   <Segmentdiv style={{ height: '95%', width: '100%' }}>
+    <Segment basic style={{ height: '100%', width: '100%' }}>
      <Grid
       className='randomvideogrid'
-      columns={3}
+      columns={width <= 768 ? 1 : 3}
       verticalAlign='middle'
       centered
       container
@@ -72,17 +86,6 @@ export default function Videodiv({
         <h4>You</h4>
        </Supervideodiv>
       </Grid.Column>
-      {/* {peers.map((obj) => {
-       console.log(obj);
-       return (
-        <Grid.Column>
-         <Supervideodiv>
-          <Video playsInline autoPlay muted src={new MediaSource(obj.stream)} />
-          <h4>{obj.userId}</h4>
-         </Supervideodiv>
-        </Grid.Column>
-       );
-      })} */}
      </Grid>
     </Segment>
    </Segmentdiv>
@@ -95,14 +98,14 @@ export default function Videodiv({
        inverted
        color='green'
        name='video'
-       size='large'
+       size={size}
        onClick={() => changeVideoStatus(setVideoStatus, videoStatus)}
       />
      ) : (
       <Icon
        circular
        name='video'
-       size='large'
+       size={size}
        onClick={() => changeVideoStatus(setVideoStatus, videoStatus)}
       />
      )}
@@ -110,7 +113,7 @@ export default function Videodiv({
       closeIcon
       open={open}
       size='small'
-      trigger={<Icon circular inverted color='red' name='call' size='large' />}
+      trigger={<Icon circular inverted color='red' name='call' size={size} />}
       onClose={() => setOpen(false)}
       onOpen={() => setOpen(true)}
      >
@@ -145,22 +148,39 @@ export default function Videodiv({
        inverted
        color='green'
        name='unmute'
-       size='large'
+       size={size}
        onClick={() => changeAudioStatus(setAudioStatus, audioStatus)}
       />
      ) : (
       <Icon
        circular
        name='unmute'
-       size='large'
+       size={size}
        onClick={() => changeAudioStatus(setAudioStatus, audioStatus)}
       />
      )}
-     {/* <Checkbox
-      checked={visible}
-      label={{ children: <code>Show Chats</code> }}
-      onChange={(e, data) => setVisiblity(data.checked)}
-     /> */}
+     <Icon
+      circular
+      inverted
+      color='green'
+      name='copy'
+      size={size}
+      onClick={async () => {
+       const pageLocation = window.location.href;
+       await navigator.clipboard.writeText(pageLocation);
+       alert('Meet url copied');
+      }}
+     />
+     {!btnvisible && (
+      <Icon
+       circular
+       inverted
+       color='green'
+       name='user'
+       size={size}
+       onClick={() => setVisible(true)}
+      />
+     )}
     </Controldiv>
    </Animateddiv>
   </Maindiv>
@@ -169,6 +189,9 @@ export default function Videodiv({
 const Maindiv = styled.div`
  height: 100%;
  width: 100%;
+ display: flex;
+ flex-direction: column;
+ overflow: hidden;
 `;
 
 const Segmentdiv = styled.div`
@@ -180,8 +203,7 @@ const Segmentdiv = styled.div`
 
 const Animateddiv = styled.div`
  width: 100%;
- position: fixed;
- bottom: 0rem;
+ height: 15%;
  i {
   cursor: pointer;
  }
@@ -191,6 +213,10 @@ const Supervideodiv = styled.div`
  position: relative;
  background-color: #838282;
  :hover {
+  background-color: #000;
+  video {
+   opacity: 0.5;
+  }
   h4 {
    display: block;
   }
@@ -203,12 +229,14 @@ const Supervideodiv = styled.div`
   left: 50%;
   display: none;
   transform: translate(-50%, -150%);
+  color: white;
  }
 `;
 
 const Video = styled.video`
  width: 100%;
- height: auto;
+ height: 19rem;
+ object-fit: contain;
 `;
 
 const Controldiv = styled.div`

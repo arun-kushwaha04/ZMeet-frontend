@@ -1,9 +1,11 @@
-// const BACKEND_URL = 'http://192.168.64.110:8000';
 // const BACKEND_URL = 'http://localhost:8000';
-// const HOSTNAME = '127.0.0.1';
+// const HOSTNAME = 'localhost';
+// const PORT = 8000;
+// const SECURE = false;
 
 const BACKEND_URL = `https://zmeet.onrender.com`;
-const PORT = 10000;
 const HOSTNAME = 'zmeet.onrender.com';
+const PORT = 443;
+const SECURE = true;
 
-export { BACKEND_URL, HOSTNAME, PORT };
+export { BACKEND_URL, HOSTNAME, PORT, SECURE };
